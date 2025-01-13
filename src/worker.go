@@ -86,6 +86,22 @@ func Worker(mapf func(string, string) []KeyValue,
 	return
 }
 
+// Start a thread that listens for RPCs from worker.go
+func (w *worker) server() {
+	rpc.Register(w)
+	rpc.HandleHTTP()
+	l, e := net.Listen("tcp", ":1234")
+	// For socket based Connection
+	// sockname := coordinatorSock()
+	// os.Remove(sockname)
+	// fmt.Println(sockname)
+	// l, e := net.Listen("unix", sockname)
+	if e != nil {
+		log.Fatal("listen error:", e)
+	}
+	go http.Serve(l, nil)
+}
+
 func pingCoordinator() error {
 	args := PingArgs{}
 	reply := PingReply{}
